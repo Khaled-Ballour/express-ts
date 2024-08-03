@@ -1,11 +1,12 @@
-import { NextFunction, Request, Response } from 'express';
-import { controller, use, get, post, bodyValidator } from './decorators';
+import { Request, Response } from 'express';
+import { controller, use, get, post, req } from './decorators';
+import { bodyValidator } from '../middlewares';
 
 @controller('/auth')
 class LoginController {
   @get('/login')
-  getLogin(req: Request, res: Response): void {
-    res.send(`
+  getLogin() {
+    return `
       <form method="POST">
         <div>
           <label>Email</label>
@@ -17,17 +18,17 @@ class LoginController {
         </div>
         <button>Submit</button>
       </form>
-    `);
+    `;
   }
 
   @post('/login')
-  @bodyValidator('email', 'password')
-  postLogin(req: Request, res: Response) {
+  @use(bodyValidator('email', 'password'))
+  postLogin(@req() req: Request, res: Response) {
     const { email, password } = req.body;
-    if (email === 'hi@hi.com' && password === 'pass') {
+    if (email === 'email@login.com' && password === 'pass') {
       req.session = { loggedIn: true };
       res.redirect('/');
-    } else res.send('Invalid email or password');
+    } else return 'Invalid email or password';
   }
 
   @get('/logout')

@@ -1,35 +1,31 @@
-import { Request, Response, NextFunction } from 'express';
-import { use, get, controller } from './decorators';
-
-function protect(req: Request, res: Response, next: NextFunction): void {
-  if (req.session?.loggedIn) return next();
-  res.status(403).send('Not permitted');
-}
+import { Request } from 'express';
+import { use, get, req, controller } from './decorators';
+import { protect } from '../middlewares';
 
 @controller('')
 class RootController {
   @get('/')
-  getIndex(req: Request, res: Response) {
+  getIndex(@req() req: Request): string {
     if (req.session?.loggedIn) {
-      res.send(`
+      return `
         <dev>
           <div>You are loggedIn</div>
           <a href="/auth/logout">Logout</a>
-        </div>    
-      `);
+        </div>
+      `;
     } else {
-      res.send(`
+      return `
         <dev>
           <div>You are not loggedIn</div>
           <a href="/auth/login">Login</a>
-        </div>    
-      `);
+        </div>
+      `;
     }
   }
 
   @get('/protected')
   @use(protect)
-  getProtected(req: Request, res: Response) {
-    res.send('Welcome to protected route');
+  getProtected(): string {
+    return 'Welcome to protected route';
   }
 }
